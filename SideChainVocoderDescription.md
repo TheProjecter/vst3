@@ -1,0 +1,25 @@
+The SCV copies sample data into a 256-sample input buffer. Every 128 samples, it runs an FFT on this data (left and right channel), bins the signal strength of each channel into 13 bands, and applies those binned volumes to the other channel. The result is FFT-ed back.
+
+Two playback buffers are kept, each 128 samples offset from the other. One is full of "new" samples, which are being faded in, and one is full of "slightly older" samples which are being faded out. Thus, the "new" FFT transform is linearly faded in over 128 samples (and then faded out over 128 samples). This means that the edges are never heard, which is good, because edges of the windows will not line up when being processed like above.
+
+The bin sizes have the following approximate bandwidths and _starting_ frequencies:
+
+| bin | bandwidth | base freq |
+|:----|:----------|:----------|
+| 1   | 187.5 Hz  | 187.5 Hz  |
+| 2   | 187.5 Hz  | 375 Hz    |
+| 3   | 187.5 Hz  | 582.5 Hz  |
+| 4   | 375 Hz    | 750 Hz    |
+| 5   | 375 Hz    | 1.12 kHz  |
+| 6   | 750 Hz    | 1.5 kHz   |
+| 7   | 750 Hz    | 2.25 kHz  |
+| 8   | 1.5 kHz   | 3.0 kHz   |
+| 9   | 1.5 kHz   | 4.5 kHz   |
+| 10  | 3.0 kHz   | 6.0 kHz   |
+| 11  | 3.0 kHz   | 9.0 kHz   |
+| 12  | 6.0 kHz   | 12.0 kHz  |
+| 13  | 6.0 kHz   | 18.0 kHz  |
+
+Note that the zeroth bin ("DC" up to 180 Hz) is treated specially, and just multiplied between the two signals and shared. This is because the "amplitude" of this bin could only be determined by using memory, which in turn means it would be unacceptably delayed.
+
+You may want to look at SideChainVocoderTodo for things to do.
